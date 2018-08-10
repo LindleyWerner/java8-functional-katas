@@ -1,11 +1,12 @@
 package katas;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import util.DataUtil;
+import static java.util.stream.Collectors.toList;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import util.DataUtil;
 
 /*
     Goal: Create a datastructure from the given data:
@@ -57,14 +58,38 @@ import java.util.Map;
     Output: the given datastructure
 */
 public class Kata11 {
-    public static List<Map> execute() {
-        List<Map> lists = DataUtil.getLists();
-        List<Map> videos = DataUtil.getVideos();
-        List<Map> boxArts = DataUtil.getBoxArts();
-        List<Map> bookmarkList = DataUtil.getBookmarkList();
-
-        return ImmutableList.of(ImmutableMap.of("name", "someName", "videos", ImmutableList.of(
-                ImmutableMap.of("id", 5, "title", "The Chamber", "time", 123, "boxart", "someUrl")
-        )));
+    public static List<Map<String, Object>> execute() {
+        List<Map<String, Object>> lists = DataUtil.getLists();
+        List<Map<String, Object>> videos = DataUtil.getVideos();
+        List<Map<String, Object>> boxArts = DataUtil.getBoxArts();
+        List<Map<String, Object>> bookmarkList = DataUtil.getBookmarkList();
+        
+        return lists.stream()
+            	.map(list -> {
+            		Map<String, Object> myMap = new HashMap<>();
+        			myMap.put("name", list.get("name").toString());
+        			myMap.put("videos", videos.stream()
+        	        					.filter(video -> (int) video.get("listId") == (int) list.get("id"))
+        	        					.map(choosedVideo -> {
+        	        						Map<String, Object> myMap2 = new HashMap<>();
+        	        						int id = (int) choosedVideo.get("id");
+        	        						myMap2.put("id", id);
+        	        						myMap2.put("title", choosedVideo.get("title"));
+        	        						myMap2.put("time", bookmarkList.stream()
+        	        											.filter(bookmark -> (int) bookmark.get("videoId") == id)
+        	        											.map(choosedBookmark -> choosedVideo.get("title"))
+        	        											.collect(toList()));
+        	        						myMap2.put("boxart", boxArts.stream()
+        											.filter(boxart -> (int) boxart.get("videoId") == id)
+        											.limit(1)
+        											.map(choosedBoxart -> choosedBoxart.get("url"))
+        											.collect(toList()));
+        	        						return myMap2;
+        	        					})
+        	        					.collect(toList()));
+        			
+            		return myMap;
+            	})        	
+            	.collect(toList());
     }
 }

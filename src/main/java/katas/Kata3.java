@@ -1,11 +1,11 @@
 package katas;
 
-import com.google.common.collect.ImmutableList;
-import model.Movie;
-import model.MovieList;
-import util.DataUtil;
+import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+
+import model.MovieList;
+import util.DataUtil;
 
 /*
     Goal: Use map() and flatMap() to project and flatten the movieLists into an array of video ids (flatMap(c -> c.stream()))
@@ -15,7 +15,11 @@ import java.util.List;
 public class Kata3 {
     public static List<Integer> execute() {
         List<MovieList> movieLists = DataUtil.getMovieLists();
-
-        return ImmutableList.of(1, 2, 3);
+        
+        return movieLists.stream()
+        	.map(movieList -> movieList.getVideos())
+        	.flatMap(movies -> movies.stream()
+        			.map(movie -> movie.getId())        			)
+        	.collect(toList());
     }
 }
